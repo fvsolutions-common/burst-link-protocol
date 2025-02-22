@@ -47,10 +47,8 @@ struct Decoder
                 {
                     throw std::runtime_error("Overflow error");
                 }
-                
             }
         }
-
         return result;
     }
 };

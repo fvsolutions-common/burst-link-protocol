@@ -39,14 +39,3 @@ class BurstFramingInterface:
         self.buffer = separated_packets.pop()
         return [self.decode_packet(packet) for packet in separated_packets]
 
-
-if __name__ == "__main__":
-    bfi = BurstFramingInterface()
-    packets = [b"Hello, world!", b"Goodbye, world!"]
-    encoded = bfi.encode(packets)
-    print(encoded)
-    decoded = bfi.decode(encoded)
-    print(decoded)
-    
-    
-    

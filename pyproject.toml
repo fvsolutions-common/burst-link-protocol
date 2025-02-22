@@ -10,6 +10,7 @@ python = ">=3.10,<4.0"
 cobs = "^1.2.1"
 numpy = "^2.2.3"
 crc = "^7.1.0"
+pytest-cov = "^6.0.0"
 
 [tool.poetry.group.dev.dependencies]
 scikit-build-core = {extras = ["pyproject"], version = "^0.10.7"}

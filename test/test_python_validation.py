@@ -25,7 +25,3 @@ def test_python_crc_validation():
             decoded = interface.decode(bytes(data_copy))
             print(decoded)
             assert len(decoded) == len(packets), f"Expected {len(packets)} packets, got {len(decoded)}"
-            
-if __name__ == "__main__":
-    test_python()
-    test_python_crc_validation()

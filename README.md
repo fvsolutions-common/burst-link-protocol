@@ -38,6 +38,28 @@ python -m nanobind.stubgen -m nanobind_example_ext
 ```
 pip wheel .
 ```
+# Test
+
+```sh
+pytest
+```
+
+# BURST protocol
+TODO
+* STAGE 1
+    * Convert cpp to c files
+    * Formalise naming
+    * Add c encode functions
+    * Test c encode functions
+    * Update README
+    * Improv epoetry.toml
+
+* STAGE 2
+    * Add CI/CD on github to compile x86
+    * Publish on pypi
+* STAGE 3
+    * Add a way to get C test coverage
+
 
 
 

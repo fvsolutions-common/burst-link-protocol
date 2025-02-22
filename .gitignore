@@ -3,3 +3,4 @@ build
 *.whl
 poetry.lock
 **.pyc
+.coverage
