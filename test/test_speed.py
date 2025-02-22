@@ -1,10 +1,7 @@
 
-from burst_interface import BurstInterfacePy,BurstInterfaceC
+from burst_link_protocol import BurstInterfacePy,BurstInterfaceC
 import pytest
-from cobs import cobs
-import tqdm
 import numpy as np
-import time
 
 def prepare_packets(packet_size:int) -> bytes:
     python_interface =  BurstInterfacePy()

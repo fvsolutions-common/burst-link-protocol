@@ -1,5 +1,5 @@
 
-from burst_interface import BurstInterfacePy
+from burst_link_protocol import BurstInterfacePy
 import pytest
 
 def test_python():

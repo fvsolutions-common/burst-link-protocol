@@ -4,3 +4,4 @@ build
 poetry.lock
 **.pyc
 .coverage
+*.tar.gz

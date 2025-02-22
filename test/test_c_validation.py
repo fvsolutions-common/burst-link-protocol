@@ -1,7 +1,6 @@
 
-from burst_interface import BurstInterfacePy,BurstInterfaceC
+from burst_link_protocol import BurstInterfacePy,BurstInterfaceC
 import pytest
-from cobs import cobs
 import numpy as np
 
 def test_c_decoder_python():
@@ -44,7 +43,7 @@ def test_encoding():
     interface =  BurstInterfacePy()
     c_interface =  BurstInterfaceC()
     packets = [b"Hello, world!", b"Goodbye, world!"]
-    
+
     assert interface.encode(packets) == c_interface.encode(packets)
 
 # if __name__ == "__main__":
