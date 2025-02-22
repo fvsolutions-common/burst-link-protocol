@@ -15,11 +15,9 @@ void my_decoder_init(decoder_t *ctx, uint8_t *buffer, size_t size)
 cobs_status_t decoder_ingest(decoder_t *ctx, const uint8_t *data, size_t size,
                              size_t *consumed_bytes)
 {
-
   // If the decoder was finished, reset it.
   if (ctx->finished)
   {
-    // printf("Resetting decoder\n");
     decoder_reset(ctx);
   }
 
@@ -29,10 +27,7 @@ cobs_status_t decoder_ingest(decoder_t *ctx, const uint8_t *data, size_t size,
     (*consumed_bytes)++;
 
     cobs_status_t result = decoder_ingest_byte(ctx, byte);
-    // if (result == COBS_PACKET_READY)
-    // {
-    //   // printf("Packet ready\n");
-    // }
+
     if (result != COBS_DATA_CONSUMED)
     {
       ctx->finished = true;
@@ -81,8 +76,6 @@ cobs_status_t complete_packet(decoder_t *ctx)
 // If the buffer is full, return COBS_OVERFLOW_ERROR
 // If the byte is consumed, but the packet is not complete, return COBS_DATA_CONSUMED
 // If the packet is complete, return COBS_PACKET_READY
-
-
 cobs_status_t decoder_ingest_byte(decoder_t *ctx, uint8_t byte)
 {
     // Check if there is space for more data.

@@ -24,7 +24,7 @@ struct Decoder
         size_t bytes_consumed = 0;
         while (bytes_consumed < data_size)
         {
-            cobs_status_t status = decoder_ingest(&decoder, data_ptr+bytes_consumed, data_size-bytes_consumed, &bytes_consumed);
+            cobs_status_t status = decoder_ingest(&decoder, data_ptr + bytes_consumed, data_size - bytes_consumed, &bytes_consumed);
 
             if (status == COBS_PACKET_READY)
             {
@@ -33,10 +33,21 @@ struct Decoder
                 result.append(packet_bytes);
             }
 
-            if (status == COBS_CRC_ERROR)
+            if (fail_on_crc_error)
             {
-                if (fail_on_crc_error)
+                if (status == COBS_CRC_ERROR)
+                {
                     throw std::runtime_error("CRC error");
+                }
+                if (status == COBS_DECODE_ERROR)
+                {
+                    throw std::runtime_error("Decode error");
+                }
+                if (status == COBS_OVERFLOW_ERROR)
+                {
+                    throw std::runtime_error("Overflow error");
+                }
+                
             }
         }
 
@@ -44,64 +55,8 @@ struct Decoder
     }
 };
 
-// NB_MODULE(nanobind_example_ext, m)
-// {
-// }
-
-// nb::list decode(nb::bytes data)
-// {
-
-//     return result;
-// }
-
-// decoder_t decoder;
-// uint8_t decoder_buffer[5000] = {0};
-// int read_data_from_uart(uint8_t *data, uint32_t size) { return 0; }
-
-// int main() {
-
-//   my_decoder_init(&decoder, decoder_buffer, sizeof(decoder_buffer));
-
-//   while (1) {
-//     uint8_t bytes[1000] = {0};
-//     uint32_t bytes_read = read_data_from_uart(bytes, sizeof(bytes));
-
-//     // If no data is read, continue
-//     if (bytes_read == 0) {
-//       continue;
-//     }
-
-//     size_t bytes_consumed = 0;
-//     while (bytes_consumed < bytes_read) {
-
-//       cobs_status_t result =
-//           decoder_ingest(&decoder, decoder_buffer, bytes_read, &bytes_consumed);
-
-//       if (result == COBS_PACKET_READY) {
-//         packet_t packet = decoder_get_packet(&decoder);
-//         printf("received a packet of size %d\n", (int)packet.size);
-//       }
-
-//       if (result == COBS_CRC_ERROR) {
-//         printf("CRC error\n");
-//       }
-//     }
-//   }
-// }
-
-int add(int a, int b)
-{
-    printf("Addinrrg %d and %d\n", a, b);
-    return a + b;
-}
-
 NB_MODULE(nanobind_example_ext, m)
 {
-
-    m.def("add", &add);
-
-    m.def("add_Test", [](float a, int b)
-          { return a + b; }, "test"_a, "b"_a);
 
     nb::class_<Decoder>(m, "Decoder")
         .def(nb::init<>())

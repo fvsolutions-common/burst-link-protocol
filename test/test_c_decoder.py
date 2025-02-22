@@ -3,6 +3,7 @@ from burst.burst_interface import BurstFramingInterface
 from nanobind_example_ext import Decoder
 import pytest
 from cobs import cobs
+import numpy as np
 
 def test_c_decoder_python():
     python_interface =  BurstFramingInterface()
@@ -33,6 +34,15 @@ def test_python_crc_validation():
             print(decoded)
             assert len(decoded) == len(packets), f"Expected {len(packets)} packets, got {len(decoded)}"
 
-if __name__ == "__main__":
-    test_c_decoder_python()
-    test_python_crc_validation()
+def test_max_size_error():
+    interface =  BurstFramingInterface()
+    c_interface =  Decoder()
+    packets = np.random.bytes(1500)
+    with pytest.raises(Exception):
+        data = c_interface.decode(interface.encode([packets]),fail_on_crc_error=True)
+    
+
+# if __name__ == "__main__":
+#     # test_c_decoder_python()
+#     # test_python_crc_validation()
+#     # max_size_error()

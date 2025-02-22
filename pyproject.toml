@@ -15,6 +15,8 @@ crc = "^7.1.0"
 scikit-build-core = {extras = ["pyproject"], version = "^0.10.7"}
 nanobind = "^2.5.0"
 pytest = "^8.3.4"
+tdqm = "^0.0.1"
+pytest-benchmark = "^5.1.0"
 
 [project]
 name = "nanobind-example"

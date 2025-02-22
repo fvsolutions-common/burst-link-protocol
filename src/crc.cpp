@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 /*
- * Helper: Calculate CRC16-CCITT (polynomial 0x1021, initial value 0xFFFF) over
+ * Calculate CRC16-CCITT (polynomial 0x1021, initial value 0xFFFF) over
  * the provided data.
  */
 uint16_t crc16_ccitt(const uint8_t *data, size_t length) {
