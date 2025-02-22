@@ -1,18 +1,18 @@
-#include "decoder.h"
+#include "burst_interface.h"
 #include "crc.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 
-void my_decoder_init(decoder_t *ctx, uint8_t *buffer, size_t size)
+void my_decoder_init(burst_decoder_t *ctx, uint8_t *buffer, size_t size)
 {
   ctx->buffer = buffer;
   ctx->buffer_size = size;
   decoder_reset(ctx);
 }
 
-cobs_status_t decoder_ingest(decoder_t *ctx, const uint8_t *data, size_t size,
+burst_status_t decoder_ingest(burst_decoder_t *ctx, const uint8_t *data, size_t size,
                              size_t *consumed_bytes)
 {
   // If the decoder was finished, reset it.
@@ -26,17 +26,17 @@ cobs_status_t decoder_ingest(decoder_t *ctx, const uint8_t *data, size_t size,
     uint8_t byte = data[i];
     (*consumed_bytes)++;
 
-    cobs_status_t result = decoder_ingest_byte(ctx, byte);
+    burst_status_t result = decoder_ingest_byte(ctx, byte);
 
-    if (result != COBS_DATA_CONSUMED)
+    if (result != BURST_DATA_CONSUMED)
     {
       ctx->finished = true;
       return result;
     }
   }
-  return COBS_DATA_CONSUMED;
+  return BURST_DATA_CONSUMED;
 }
-void decoder_reset(decoder_t *ctx)
+void decoder_reset(burst_decoder_t *ctx)
 {
   ctx->out_head = 0;
   ctx->current_code = 0;
@@ -45,12 +45,12 @@ void decoder_reset(decoder_t *ctx)
   ctx->finished = false;
 }
 
-cobs_status_t complete_packet(decoder_t *ctx)
+burst_status_t complete_packet(burst_decoder_t *ctx)
 {
   // Ensure we have at least two bytes for the CRC.
   if (ctx->out_head < CRC_SIZE)
   {
-    return COBS_CRC_ERROR;
+    return BURST_CRC_ERROR;
   }
 
   // Calculate the CRC over the packet data excluding the last two CRC bytes.
@@ -64,30 +64,30 @@ cobs_status_t complete_packet(decoder_t *ctx)
   // Check if the CRCs match.
   if (computed_crc != received_crc)
   {
-    return COBS_CRC_ERROR;
+    return BURST_CRC_ERROR;
   }
 
   // CRC check passed, we can remove it from the packet.
   ctx->out_head -= CRC_SIZE;
-  return COBS_PACKET_READY;
+  return BURST_PACKET_READY;
 }
 
 // If byte is a delimiter but a block is not complete, return COBS_DECODE_ERROR
 // If the buffer is full, return COBS_OVERFLOW_ERROR
 // If the byte is consumed, but the packet is not complete, return COBS_DATA_CONSUMED
 // If the packet is complete, return COBS_PACKET_READY
-cobs_status_t decoder_ingest_byte(decoder_t *ctx, uint8_t byte)
+burst_status_t decoder_ingest_byte(burst_decoder_t *ctx, uint8_t byte)
 {
     // Check if there is space for more data.
     if (ctx->out_head >= ctx->buffer_size) {
-        return COBS_OVERFLOW_ERROR;
+        return BURST_OVERFLOW_ERROR;
     }
     
     // If the byte is a delimiter, decide if it terminates the packet.
     if (byte == COBS_DELIMITER) {
         // If in the middle of a block, a delimiter is not allowed.
         if (ctx->current_code != 0) {
-            return COBS_DECODE_ERROR;
+            return BURST_DECODE_ERROR;
         }
         // Otherwise, the packet is complete.
         return complete_packet(ctx);
@@ -96,21 +96,21 @@ cobs_status_t decoder_ingest_byte(decoder_t *ctx, uint8_t byte)
     // If a zero is pending from a previous block, insert it now.
     if (ctx->pending_zero) {
         if (ctx->out_head >= ctx->buffer_size) {
-            return COBS_OVERFLOW_ERROR;
+            return BURST_OVERFLOW_ERROR;
         }
         ctx->buffer[ctx->out_head++] = COBS_DELIMITER;
         ctx->pending_zero = false;
         // Now, treat the current byte as a new block code.
         ctx->current_code = byte;
         ctx->bytes_remaining = (byte > 0 ? byte - 1 : 0);
-        return COBS_DATA_CONSUMED;
+        return BURST_DATA_CONSUMED;
     }
     
     // If not currently in a block, this byte is the new block code.
     if (ctx->current_code == 0) {
         ctx->current_code = byte;
         ctx->bytes_remaining = (byte > 0 ? byte - 1 : 0);
-        return COBS_DATA_CONSUMED;
+        return BURST_DATA_CONSUMED;
     }
     
     // Otherwise, we are in the middle of a block so treat the byte as data.
@@ -128,22 +128,22 @@ cobs_status_t decoder_ingest_byte(decoder_t *ctx, uint8_t byte)
         ctx->current_code = 0;
     }
     
-    return COBS_DATA_CONSUMED;
+    return BURST_DATA_CONSUMED;
 }
 
 
-packet_t decoder_get_packet(decoder_t *ctx)
+burst_packet_t decoder_get_packet(burst_decoder_t *ctx)
 {
 
   if (!ctx->finished)
   {
-    packet_t packet;
+    burst_packet_t packet;
     packet.data = NULL;
     packet.size = 0;
     return packet;
   }
 
-  packet_t packet;
+  burst_packet_t packet;
   packet.data = ctx->buffer;
   packet.size = ctx->out_head;
   return packet;

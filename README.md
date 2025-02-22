@@ -54,6 +54,7 @@ TODO
     * Update README
     * Improve poetry.toml
 
+
 * STAGE 2
     * Add CI/CD on github to compile x86
     * Publish on pypi

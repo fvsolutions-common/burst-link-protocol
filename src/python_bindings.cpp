@@ -1,13 +1,12 @@
 #include <nanobind/nanobind.h>
-
-#include <decoder.h>
+#include <burst_interface.h>
 
 namespace nb = nanobind;
 using namespace nb::literals;
 
 struct Decoder
 {
-    decoder_t decoder;
+    burst_decoder_t decoder;
     uint8_t decoder_buffer[1024] = {0};
 
     Decoder()
@@ -24,26 +23,26 @@ struct Decoder
         size_t bytes_consumed = 0;
         while (bytes_consumed < data_size)
         {
-            cobs_status_t status = decoder_ingest(&decoder, data_ptr + bytes_consumed, data_size - bytes_consumed, &bytes_consumed);
+            burst_status_t status = decoder_ingest(&decoder, data_ptr + bytes_consumed, data_size - bytes_consumed, &bytes_consumed);
 
-            if (status == COBS_PACKET_READY)
+            if (status == BURST_PACKET_READY)
             {
-                packet_t packet = decoder_get_packet(&decoder);
+                burst_packet_t packet = decoder_get_packet(&decoder);
                 nb::bytes packet_bytes(reinterpret_cast<const char *>(packet.data), packet.size);
                 result.append(packet_bytes);
             }
 
             if (fail_on_crc_error)
             {
-                if (status == COBS_CRC_ERROR)
+                if (status == BURST_CRC_ERROR)
                 {
                     throw std::runtime_error("CRC error");
                 }
-                if (status == COBS_DECODE_ERROR)
+                if (status == BURST_DECODE_ERROR)
                 {
                     throw std::runtime_error("Decode error");
                 }
-                if (status == COBS_OVERFLOW_ERROR)
+                if (status == BURST_OVERFLOW_ERROR)
                 {
                     throw std::runtime_error("Overflow error");
                 }
