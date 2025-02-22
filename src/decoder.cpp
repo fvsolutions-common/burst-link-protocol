@@ -5,20 +5,20 @@
 #include <stdint.h>
 #include <stdio.h>
 
-void my_decoder_init(burst_decoder_t *ctx, uint8_t *buffer, size_t size)
+void burst_decoder_init(burst_decoder_t *ctx, uint8_t *buffer, size_t size)
 {
   ctx->buffer = buffer;
   ctx->buffer_size = size;
-  decoder_reset(ctx);
+  burst_decoder_reset(ctx);
 }
 
-burst_status_t decoder_ingest(burst_decoder_t *ctx, const uint8_t *data, size_t size,
+burst_status_t bust_decoder_add_data(burst_decoder_t *ctx, const uint8_t *data, size_t size,
                              size_t *consumed_bytes)
 {
   // If the decoder was finished, reset it.
   if (ctx->finished)
   {
-    decoder_reset(ctx);
+    burst_decoder_reset(ctx);
   }
 
   for (size_t i = 0; i < size; i++)
@@ -26,7 +26,7 @@ burst_status_t decoder_ingest(burst_decoder_t *ctx, const uint8_t *data, size_t 
     uint8_t byte = data[i];
     (*consumed_bytes)++;
 
-    burst_status_t result = decoder_ingest_byte(ctx, byte);
+    burst_status_t result = burst_decoder_add_byte(ctx, byte);
 
     if (result != BURST_DATA_CONSUMED)
     {
@@ -36,7 +36,7 @@ burst_status_t decoder_ingest(burst_decoder_t *ctx, const uint8_t *data, size_t 
   }
   return BURST_DATA_CONSUMED;
 }
-void decoder_reset(burst_decoder_t *ctx)
+void burst_decoder_reset(burst_decoder_t *ctx)
 {
   ctx->out_head = 0;
   ctx->current_code = 0;
@@ -45,7 +45,7 @@ void decoder_reset(burst_decoder_t *ctx)
   ctx->finished = false;
 }
 
-burst_status_t complete_packet(burst_decoder_t *ctx)
+burst_status_t burst_decoder_complete_packet(burst_decoder_t *ctx)
 {
   // Ensure we have at least two bytes for the CRC.
   if (ctx->out_head < CRC_SIZE)
@@ -76,7 +76,7 @@ burst_status_t complete_packet(burst_decoder_t *ctx)
 // If the buffer is full, return COBS_OVERFLOW_ERROR
 // If the byte is consumed, but the packet is not complete, return COBS_DATA_CONSUMED
 // If the packet is complete, return COBS_PACKET_READY
-burst_status_t decoder_ingest_byte(burst_decoder_t *ctx, uint8_t byte)
+burst_status_t burst_decoder_add_byte(burst_decoder_t *ctx, uint8_t byte)
 {
     // Check if there is space for more data.
     if (ctx->out_head >= ctx->buffer_size) {
@@ -90,7 +90,7 @@ burst_status_t decoder_ingest_byte(burst_decoder_t *ctx, uint8_t byte)
             return BURST_DECODE_ERROR;
         }
         // Otherwise, the packet is complete.
-        return complete_packet(ctx);
+        return burst_decoder_complete_packet(ctx);
     }
     
     // If a zero is pending from a previous block, insert it now.
@@ -132,7 +132,7 @@ burst_status_t decoder_ingest_byte(burst_decoder_t *ctx, uint8_t byte)
 }
 
 
-burst_packet_t decoder_get_packet(burst_decoder_t *ctx)
+burst_packet_t burst_decoder_get_packet(burst_decoder_t *ctx)
 {
 
   if (!ctx->finished)

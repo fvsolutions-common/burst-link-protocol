@@ -69,6 +69,7 @@ nanobind_add_module(
 
   # Source code goes here
   src/decoder.cpp
+  src/encoder.cpp
   src/python_bindings.cpp
   src/crc.cpp
 )

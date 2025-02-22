@@ -40,6 +40,12 @@ def test_max_size_error():
     with pytest.raises(Exception):
         data = c_interface.decode(interface.encode([packets]),fail_on_crc_error=True)
     
+def test_encoding():
+    interface =  BurstInterfacePy()
+    c_interface =  BurstInterfaceC()
+    packets = [b"Hello, world!", b"Goodbye, world!"]
+    
+    assert interface.encode(packets) == c_interface.encode(packets)
 
 # if __name__ == "__main__":
 #     # test_c_decoder_python()

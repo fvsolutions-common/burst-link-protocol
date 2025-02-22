@@ -8,7 +8,7 @@
 // The algorithm works by maintaining a "code" (the count of nonzero bytes)
 // and inserting that count at the start of each block. When a zero is encountered
 // (or when the block length reaches COBS_MAX_CODE) the block is terminated.
-burst_status_t encoder_add_packet(burst_encoder_t *ctx, const uint8_t *data, size_t size)
+burst_status_t burst_encoder_add_packet(burst_encoder_t *ctx, const uint8_t *data, size_t size)
 {
     // Compute the CRC over the raw packet data.
     uint16_t crc = crc16_ccitt(data, size);
@@ -73,14 +73,14 @@ burst_status_t encoder_add_packet(burst_encoder_t *ctx, const uint8_t *data, siz
     return BURST_PACKET_READY;
 }
 
-void my_encoder_init(burst_encoder_t *ctx, uint8_t *buffer, size_t size)
+void burst_encoder_init(burst_encoder_t *ctx, uint8_t *buffer, size_t size)
 {
     ctx->buffer = buffer;
     ctx->buffer_size = size;
     ctx->out_head = 0;
 }
 
-burst_packet_t encoder_flush(burst_encoder_t *ctx)
+burst_packet_t burst_encoder_flush(burst_encoder_t *ctx)
 {
     burst_packet_t packet;
     packet.data = ctx->buffer;

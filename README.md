@@ -49,10 +49,10 @@ TODO
 * STAGE 1
     * Convert cpp to c files
     * Formalise naming [OK]
-    * Add c encode functions
-    * Test c encode functions
+    * Add c encode functions [OK]
+    * Test c encode functions [OK]
     * Update README
-    * Improve poetry.toml
+    * Improve poetry.toml 
 
 
 * STAGE 2
