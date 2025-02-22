@@ -1,0 +1,38 @@
+
+from burst.burst_interface import BurstFramingInterface
+from nanobind_example_ext import Decoder
+import pytest
+from cobs import cobs
+
+def test_c_decoder_python():
+    python_interface =  BurstFramingInterface()
+    c_interface =  Decoder()
+
+    packets = [b"Hello, world!", b"Goodbye, world!"]
+
+    data = python_interface.encode(packets)
+    decoded = c_interface.decode(data)
+    print(decoded)
+    assert packets == decoded
+
+def test_python_crc_validation():
+    interface =  BurstFramingInterface()
+    packets = [b"Hello, world!", b"Goodbye, world!"]
+
+    data = bytearray(interface.encode(packets))
+
+    for i in range( len(data)):
+        c_interface =  Decoder()
+
+        data_copy = data.copy()
+
+        # modify byte x
+        data_copy[i] = (data_copy[i] + 1) % 256
+        with pytest.raises(Exception):
+            decoded = c_interface.decode(bytes(data_copy),fail_on_crc_error=True)
+            print(decoded)
+            assert len(decoded) == len(packets), f"Expected {len(packets)} packets, got {len(decoded)}"
+
+if __name__ == "__main__":
+    test_c_decoder_python()
+    test_python_crc_validation()
