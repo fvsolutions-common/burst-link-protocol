@@ -3,7 +3,7 @@ from crc import Calculator,Crc16
 
 crc = Calculator(Crc16.IBM_3740)
 
-class BurstFramingInterface:
+class BurstInterfacePy:
     buffer = b""
 
     def __init__(self):
@@ -16,7 +16,7 @@ class BurstFramingInterface:
 
     @staticmethod
     def encode_packet(packet: bytes) -> bytes:
-        packet_with_crc = packet + BurstFramingInterface.crc16(packet)
+        packet_with_crc = packet + BurstInterfacePy.crc16(packet)
         return cobs.encode(packet_with_crc) + b"\x00"
 
     @staticmethod
@@ -24,7 +24,7 @@ class BurstFramingInterface:
         # decode and check crc
         decoded = cobs.decode(packet)
 
-        if BurstFramingInterface.crc16(decoded[:-2]) != decoded[-2:]:
+        if BurstInterfacePy.crc16(decoded[:-2]) != decoded[-2:]:
             raise ValueError("CRC mismatch")
 
         return decoded[:-2]

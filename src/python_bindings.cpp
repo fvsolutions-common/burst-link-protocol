@@ -53,10 +53,10 @@ struct Decoder
     }
 };
 
-NB_MODULE(nanobind_example_ext, m)
+NB_MODULE(burst_interface_c, m)
 {
 
-    nb::class_<Decoder>(m, "Decoder")
+    nb::class_<Decoder>(m, "BurstInterfaceC")
         .def(nb::init<>())
         .def("decode", &Decoder::decode, "data"_a, "fail_on_crc_error"_a = false);
 }

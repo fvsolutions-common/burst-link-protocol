@@ -1,9 +1,9 @@
 
-from burst.burst_interface import BurstFramingInterface
+from burst_interface import BurstInterfacePy
 import pytest
 
 def test_python():
-    interface =  BurstFramingInterface()
+    interface =  BurstInterfacePy()
     packets = [b"Hello, world!", b"Goodbye, world!"]
 
     data = interface.encode(packets)
@@ -11,7 +11,7 @@ def test_python():
     assert packets == decoded
 
 def test_python_crc_validation():
-    interface =  BurstFramingInterface()
+    interface =  BurstInterfacePy()
     packets = [b"Hello, world!", b"Goodbye, world!"]
 
     data = bytearray(interface.encode(packets))

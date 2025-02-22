@@ -48,11 +48,11 @@ pytest
 TODO
 * STAGE 1
     * Convert cpp to c files
-    * Formalise naming
+    * Formalise naming [OK]
     * Add c encode functions
     * Test c encode functions
     * Update README
-    * Improv epoetry.toml
+    * Improve poetry.toml
 
 * STAGE 2
     * Add CI/CD on github to compile x86

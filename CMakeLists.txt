@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.26)
 
-project(i_think_name_does_not_matter LANGUAGES CXX)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+project(i_think_this_name_does_not_matter LANGUAGES CXX)
 
 if (NOT SKBUILD)
   message(WARNING "\
@@ -53,7 +52,7 @@ find_package(nanobind CONFIG REQUIRED)
 # We are now ready to compile the actual extension module
 nanobind_add_module(
   # Name of the extension
-  nanobind_example_ext
+  burst_interface_c
 
   # Target the stable ABI for Python 3.12+, which reduces
   # the number of binary wheels that must be built. This
@@ -76,16 +75,15 @@ nanobind_add_module(
 
 nanobind_add_stub(
   
-    nanobind_example_ext_stub
+    burst_interface_c_stub
     INSTALL_TIME
-    MODULE nanobind_example_ext
-    OUTPUT nanobind_example_ext.pyi
-    PYTHON_PATH $<TARGET_FILE_DIR:nanobind_example_ext>
-    DEPENDS nanobind_example_ext
+    MODULE burst_interface_c
+    OUTPUT burst_interface_c.pyi
+    PYTHON_PATH $<TARGET_FILE_DIR:burst_interface_c>
+    DEPENDS burst_interface_c
 )
 
-target_include_directories(nanobind_example_ext PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(burst_interface_c PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Install directive for scikit-build-core
-install(TARGETS nanobind_example_ext LIBRARY DESTINATION ".")
-# install(FILES py.typed nanobind_example_ext.pyi DESTINATION ".")
+install(TARGETS burst_interface_c LIBRARY DESTINATION ".")
