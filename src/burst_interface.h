@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define COBS_DELIMITER 0x00
 #define COBS_MAX_CODE 0xFF

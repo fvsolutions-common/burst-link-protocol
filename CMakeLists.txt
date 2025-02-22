@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.26)
 
-project(i_think_this_name_does_not_matter LANGUAGES CXX)
+project(i_think_this_name_does_not_matter LANGUAGES C CXX)
 
 if (NOT SKBUILD)
   message(WARNING "\
@@ -68,10 +68,10 @@ nanobind_add_module(
   NB_STATIC
 
   # Source code goes here
-  src/decoder.cpp
-  src/encoder.cpp
+  src/decoder.c
+  src/encoder.c
   src/python_bindings.cpp
-  src/crc.cpp
+  src/crc.c
 )
 
 nanobind_add_stub(

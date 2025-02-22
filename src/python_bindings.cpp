@@ -1,5 +1,8 @@
 #include <nanobind/nanobind.h>
+extern "C"
+{
 #include <burst_interface.h>
+}
 
 namespace nb = nanobind;
 using namespace nb::literals;
