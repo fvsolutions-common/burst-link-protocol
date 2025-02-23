@@ -15,7 +15,8 @@ dependencies = [
   "pytest-cov>=6.0.0,<7.0.0",
   "pytest-benchmark>=5.1.0,<6.0.0"
 ]
-license = "MPL-2.0"
+license-files = ["LICENSE"]
+
 
 [project.urls]
 Repository = "https://github.com/Florioo/burst-link-protocol"
