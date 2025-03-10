@@ -44,7 +44,7 @@ jobs:
       with:
         submodules: true
 
-    - uses: pypa/cibuildwheel@v2.22
+    - uses: pypa/cibuildwheel@v2.23
 
       # env:
         # CIBW_BUILD: "cp312-*"
