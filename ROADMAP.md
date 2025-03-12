@@ -20,4 +20,4 @@
 - ⬜️ Add a way to get C test coverage 
     - ⬜️ Add test report as a badge
 - ⬜️ Fix dependencies once compilation succeeds 
-
+- ⬜️ Fix packets that start with a 0x00 byte, they are currently not encoded correctly
