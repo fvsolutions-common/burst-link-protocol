@@ -145,6 +145,6 @@ burst_packet_t burst_decoder_get_packet(burst_decoder_t *ctx)
 
   burst_packet_t packet;
   packet.data = ctx->buffer;
-  packet.size = ctx->out_head-1;
+  packet.size = ctx->out_head;
   return packet;
 }
