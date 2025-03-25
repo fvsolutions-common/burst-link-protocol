@@ -1,6 +1,6 @@
 [project]
 name = "burst-link-protocol"
-version = "1.0.3"  # Choose one version reference here
+version = "1.0.4"  # Choose one version reference here
 description = "Binary Utility for Reliable Stream Transfer (BURST) is a library for encoding and decoding binary data streams into and from a byte stream."
 requires-python = ">=3.10,<4.0"
 authors = [
@@ -13,7 +13,9 @@ dependencies = [
   "crc>=7.1.0,<8.0.0",
   "pytest>=8.3.4,<9.0.0",
   "pytest-cov>=6.0.0,<7.0.0",
-  "pytest-benchmark>=5.1.0,<6.0.0"
+  "pytest-benchmark>=5.1.0,<6.0.0",
+  "scikit-build-core>=0.10.7",
+  "nanobind>=2.5.0",
 ]
 license-files = ["LICENSE"]
 

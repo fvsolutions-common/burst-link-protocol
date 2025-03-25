@@ -26,18 +26,19 @@ Note: You need a valid C++ compiler and Python 3.7+ installed on your system.
 
 Basic installation
 ```sh
-pip install -e .
+uv pip install --reinstall -e .
 ```
 
 Fast build
 ```sh
-pip install --no-build-isolation -ve .
+uv pip install --reinstall --no-build-isolation -ve .
 ```
 
 Auto rebuild on run
 ```sh
+uv pip install --reinstall --no-build-isolation -Ceditable.rebuild=true -ve .
 pip install --no-build-isolation -Ceditable.rebuild=true -ve .
-```
+``` 
 
 
 ### Python Stub files generation

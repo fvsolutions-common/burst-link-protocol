@@ -18,7 +18,7 @@
       "name": "Python: Current File",
       "type": "debugpy",
       "request": "launch",
-      "program": "test/test.py",
+      "program": "test/test_burst.py",
       "console": "integratedTerminal"
     }
   ]

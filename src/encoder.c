@@ -12,6 +12,7 @@ burst_status_t burst_encoder_add_packet(burst_encoder_t *ctx, const uint8_t *dat
 {
     // Compute the CRC over the raw packet data.
     uint16_t crc = crc16_ccitt(data, size);
+    
     uint8_t crc_high = (crc >> 8) & 0xFF;
     uint8_t crc_low  = crc & 0xFF;
     // The total number of bytes to encode: raw data + 2 bytes of CRC.
