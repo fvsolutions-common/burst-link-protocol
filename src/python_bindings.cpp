@@ -72,6 +72,7 @@ struct BurstInterface
 
 NB_MODULE(burst_interface_c, m)
 {
+    nb::set_leak_warnings(false);
 
     nb::class_<BurstInterface>(m, "BurstInterfaceC")
         .def(nb::init<>())

@@ -51,8 +51,12 @@ find_package(nanobind CONFIG REQUIRED)
 
 # We are now ready to compile the actual extension module
 nanobind_add_module(
+
   # Name of the extension
   burst_interface_c
+
+  # domain name
+  NB_DOMAIN burst_interface_domain
 
   # Target the stable ABI for Python 3.12+, which reduces
   # the number of binary wheels that must be built. This
