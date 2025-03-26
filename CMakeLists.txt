@@ -75,7 +75,7 @@ nanobind_add_module(
   src/decoder.c
   src/encoder.c
   src/python_bindings.cpp
-  src/crc.c
+  src/blp_crc16_ccitt.c
 )
 
 nanobind_add_stub(

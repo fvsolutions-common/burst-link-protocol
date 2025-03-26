@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "burst_interface.h"
-#include "crc.h"
+#include "crc_blp.h"
 
 void burst_decoder_init(burst_decoder_t *ctx, uint8_t *buffer, size_t size) {
 	ctx->buffer = buffer;
@@ -54,7 +54,7 @@ burst_status_t burst_decoder_complete_packet(burst_decoder_t *ctx) {
 	}
 
 	// Calculate the CRC over the packet data excluding the last two CRC bytes.
-	uint16_t computed_crc = crc16_ccitt(ctx->buffer, ctx->out_head - CRC_SIZE);
+	uint16_t computed_crc = blp_crc16_ccitt(ctx->buffer, ctx->out_head - CRC_SIZE);
 
 	// Extract the received CRC from the last two bytes (big-endian).
 	uint16_t received_crc = ((uint16_t)ctx->buffer[ctx->out_head - CRC_SIZE] << 8) | ctx->buffer[ctx->out_head - 1];
