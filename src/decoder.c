@@ -119,6 +119,9 @@ burst_status_t burst_decoder_add_byte(burst_decoder_t *ctx, uint8_t byte) {
 
 			return BURST_DATA_CONSUMED;
 	}
+	
+	// This should never happen, but some compilers are dumb
+	return BURST_DECODE_ERROR;
 }
 
 burst_packet_t burst_decoder_get_packet(burst_decoder_t *ctx) {
