@@ -1,7 +1,14 @@
 cmake_minimum_required(VERSION 3.15...3.26)
+# If espidf is reading this CMakeLists.txt, skip so its ignored
+
+# If ESP-IDF is reading this CMakeLists.txt, skip it
+if (DEFINED ENV{IDF_PATH})
+  message(STATUS "In ESP-IDF, skipping...")
+  return()
+endif()
+
 
 project(i_think_this_name_does_not_matter LANGUAGES C CXX)
-
 if (NOT SKBUILD)
   message(WARNING "\
   This CMake file is meant to be executed using 'scikit-build'. Running

@@ -82,6 +82,7 @@ burst_status_t burst_decoder_add_byte(burst_decoder_t *ctx, uint8_t byte) {
 				return burst_decoder_complete_packet(ctx);
 			}
 
+			/* fallthrough */
 		case COBS_DECODE_READ_CODE:
 
 			// If last code was 0xF, its a overhead byte
