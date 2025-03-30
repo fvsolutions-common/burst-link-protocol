@@ -176,7 +176,10 @@ int burst_managed_decoder_handle_data(burst_managed_decoder_t *burst_managed_dec
 	size_t bytes_consumed = 0;
 	while (bytes_consumed < len)
 	{
-		burst_status_t status = bust_decoder_add_data(&burst_managed_decoder->decoder, data + bytes_consumed, len - bytes_consumed, &bytes_consumed);
+		uint8_t *data_ptr = (uint8_t *)data + bytes_consumed;
+		size_t data_len = len - bytes_consumed;
+
+		burst_status_t status = bust_decoder_add_data(&burst_managed_decoder->decoder, data_ptr, data_len, &bytes_consumed);
 
 		switch (status)
 		{
@@ -195,8 +198,10 @@ int burst_managed_decoder_handle_data(burst_managed_decoder_t *burst_managed_dec
 		case BURST_CRC_ERROR:
 			burst_managed_decoder->statistics.crc_errors++;
 			break;
+
 		case BURST_DECODE_ERROR:
 			burst_managed_decoder->statistics.decode_errors++;
+
 			break;
 		case BURST_OVERFLOW_ERROR:
 			burst_managed_decoder->statistics.overflow_errors++;
