@@ -2,6 +2,7 @@
 #ifndef BURST_GENERIC_H
 #define BURST_GENERIC_H
 #include <stdint.h>
+#include <stddef.h>
 
 // Status codes returned by the encoder.
 typedef enum
