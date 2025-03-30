@@ -158,3 +158,52 @@ burst_packet_t burst_decoder_get_packet(burst_decoder_t *ctx)
 	packet.size = ctx->out_head;
 	return packet;
 }
+
+void burst_managed_decoder_init(burst_managed_decoder_t *burst_managed_decoder, uint8_t *buffer, size_t size, burst_managed_decoder_callback_t callback)
+{
+	burst_managed_decoder->callback_function = callback;
+	burst_decoder_init(&burst_managed_decoder->decoder, buffer, size);
+}
+
+int burst_managed_decoder_handle_data(burst_managed_decoder_t *burst_managed_decoder, const uint8_t *data, size_t len)
+{
+	if (len == 0)
+	{
+		return -1; // No data to process
+	}
+
+	burst_managed_decoder->statistics.bytes_handled += len;
+	size_t bytes_consumed = 0;
+	while (bytes_consumed < len)
+	{
+		burst_status_t status = bust_decoder_add_data(&burst_managed_decoder->decoder, data + bytes_consumed, len - bytes_consumed, &bytes_consumed);
+
+		switch (status)
+		{
+		case BURST_PACKET_READY:
+		{
+			burst_packet_t packet = burst_decoder_get_packet(&burst_managed_decoder->decoder);
+
+			if (packet.size > 0 && burst_managed_decoder->callback_function != NULL)
+			{
+				// Call the callback function with the received data
+				burst_managed_decoder->callback_function(packet.data, packet.size);
+			}
+			burst_managed_decoder->statistics.packets_processed++;
+			break;
+		}
+		case BURST_CRC_ERROR:
+			burst_managed_decoder->statistics.crc_errors++;
+			break;
+		case BURST_DECODE_ERROR:
+			burst_managed_decoder->statistics.decode_errors++;
+			break;
+		case BURST_OVERFLOW_ERROR:
+			burst_managed_decoder->statistics.overflow_errors++;
+			break;
+		default:
+			break;
+		}
+	}
+	return 0;
+}
