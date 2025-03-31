@@ -1,7 +1,7 @@
 #include <nanobind/nanobind.h>
 extern "C"
 {
-#include <burst_interface.h>
+#include <burst_link_protocol.h>
 }
 
 namespace nb = nanobind;
