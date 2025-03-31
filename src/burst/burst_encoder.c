@@ -1,7 +1,6 @@
-#include "burst_interface.h"
-#include "crc_blp.h"
 #include <stddef.h>
 #include <stdint.h>
+#include "burst_encoder.h"
 
 // COBS encoding with CRC appending.
 // The input to be encoded is the raw packet data followed by the two CRC bytes.
@@ -11,10 +10,10 @@
 burst_status_t burst_encoder_add_packet(burst_encoder_t *ctx, const uint8_t *data, size_t size)
 {
     // Compute the CRC over the raw packet data.
-    uint16_t crc = blp_crc16_ccitt(data, size);
-    
+    uint16_t crc = burst_crc16(data, size);
+
     uint8_t crc_high = (crc >> 8) & 0xFF;
-    uint8_t crc_low  = crc & 0xFF;
+    uint8_t crc_low = crc & 0xFF;
     // The total number of bytes to encode: raw data + 2 bytes of CRC.
     size_t total_bytes = size + CRC_SIZE;
 
@@ -27,7 +26,8 @@ burst_status_t burst_encoder_add_packet(burst_encoder_t *ctx, const uint8_t *dat
     ctx->buffer[ctx->out_head++] = 0; // Placeholder for the code.
 
     // Process each byte from the raw data and then the CRC.
-    for (size_t i = 0; i < total_bytes; i++) {
+    for (size_t i = 0; i < total_bytes; i++)
+    {
         uint8_t byte;
         if (i < size)
             byte = data[i];
@@ -36,7 +36,8 @@ burst_status_t burst_encoder_add_packet(burst_encoder_t *ctx, const uint8_t *dat
         else // i == size + 1
             byte = crc_low;
 
-        if (byte == 0) {
+        if (byte == 0)
+        {
             // Write the current code to the reserved position.
             ctx->buffer[code_index] = code;
             // Start a new block.
@@ -45,14 +46,17 @@ burst_status_t burst_encoder_add_packet(burst_encoder_t *ctx, const uint8_t *dat
                 return BURST_OVERFLOW_ERROR;
             code_index = ctx->out_head;
             ctx->buffer[ctx->out_head++] = 0; // Reserve placeholder for new code.
-        } else {
+        }
+        else
+        {
             // Append the nonzero byte.
             if (ctx->out_head >= ctx->buffer_size)
                 return BURST_OVERFLOW_ERROR;
             ctx->buffer[ctx->out_head++] = byte;
             code++;
             // If the maximum code value is reached, finish the block.
-            if (code == COBS_MAX_CODE) {
+            if (code == COBS_MAX_CODE)
+            {
                 ctx->buffer[code_index] = code;
                 code = 1;
                 if (ctx->out_head >= ctx->buffer_size)
@@ -62,15 +66,15 @@ burst_status_t burst_encoder_add_packet(burst_encoder_t *ctx, const uint8_t *dat
             }
         }
     }
-    
+
     // Finalize the last block.
     ctx->buffer[code_index] = code;
-    
+
     // Append the packet delimiter.
     if (ctx->out_head >= ctx->buffer_size)
-         return BURST_OVERFLOW_ERROR;
+        return BURST_OVERFLOW_ERROR;
     ctx->buffer[ctx->out_head++] = COBS_DELIMITER;
-    
+
     return BURST_PACKET_READY;
 }
 
