@@ -15,7 +15,7 @@ endif()
 
 # If Zephyr is reading this CMakeLists.txt, register it as a Zephyr module
 if(DEFINED ENV{ZEPHYR_BASE})
-  zephyr_library_named(odin-stream)
+  zephyr_library_named(burst-link-protocol)
   zephyr_library_sources(
     "src/burst/burst_decoder.c"
     "src/burst/burst_encoder.c"
