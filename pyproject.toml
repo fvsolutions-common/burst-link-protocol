@@ -1,6 +1,6 @@
 [project]
 name = "burst-link-protocol"
-version = "1.0.5"  # Choose one version reference here
+version = "1.1.0"  # Choose one version reference here
 description = "Binary Utility for Reliable Stream Transfer (BURST) is a library for encoding and decoding binary data streams into and from a byte stream."
 requires-python = ">=3.10,<4.0"
 authors = [

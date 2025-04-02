@@ -15,7 +15,7 @@ typedef struct
     uint32_t decode_errors;
 } burst_decoder_statistics_t;
 
-typedef void (*burst_managed_decoder_callback_t)(uint8_t *data, size_t length);
+typedef void (*burst_managed_decoder_callback_t)(const uint8_t *data, size_t length, void *user_data);
 
 typedef struct
 {
@@ -41,6 +41,7 @@ typedef struct
     burst_decoder_t decoder;               // Decoder instance
     burst_decoder_statistics_t statistics; // Statistics for the decoder
     burst_managed_decoder_callback_t callback_function; // Callback function for decoded packets
+    void *user_data;                       // User data for the callback function
 } burst_managed_decoder_t;
 
 void burst_decoder_init(burst_decoder_t *ctx, uint8_t *buffer, size_t size);
@@ -49,7 +50,7 @@ burst_status_t burst_decoder_add_byte(burst_decoder_t *ctx, uint8_t byte);
 burst_status_t bust_decoder_add_data(burst_decoder_t *ctx, const uint8_t *data, size_t size, size_t *consumed_bytes);
 burst_packet_t burst_decoder_get_packet(burst_decoder_t *ctx);
 
-void burst_managed_decoder_init(burst_managed_decoder_t *burst_managed_decoder, uint8_t *buffer, size_t size, burst_managed_decoder_callback_t callback);
+void burst_managed_decoder_init(burst_managed_decoder_t *burst_managed_decoder, uint8_t *buffer, size_t size, burst_managed_decoder_callback_t callback, void *user_data);
 int burst_managed_decoder_handle_data(burst_managed_decoder_t *burst_managed_decoder, const uint8_t *data, size_t len);
 
 #endif // BURST_DECODER_H
