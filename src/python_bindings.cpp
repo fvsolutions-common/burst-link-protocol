@@ -21,13 +21,14 @@ struct BurstInterface {
 		burst_encoder_init(&encoder, encoder_buffer, sizeof(encoder_buffer));
 	}
 
-	static void add_packet(const uint8_t *data, size_t size, void *user_data) {
+	static int add_packet(const uint8_t *data, size_t size, void *user_data) {
 		// Create a bytes object from the data and append it to the result list
 		// nb::bytes packet_bytes(reinterpret_cast<const char *>(data), size);
 		// result.append(packet_bytes);
 		BurstInterface *self = static_cast<BurstInterface *>(user_data);
 		nb::bytes packet_bytes(reinterpret_cast<const char *>(data), size);
 		self->result.append(packet_bytes);  // Append the packet to the result list
+		return 0;  // Return 0 to indicate success
 		
 	}
 	nb::list decode(nb::bytes data, bool fail_on_crc_error = false) {
