@@ -3,6 +3,7 @@
 
 #include <burst/burst_generic.h>
 #include <stdbool.h>
+typedef int (*burst_managed_decoder_callback_t)(const uint8_t *data, size_t length, void *user_data);
 
 typedef struct
 {
@@ -14,8 +15,6 @@ typedef struct
     uint32_t overflow_errors;
     uint32_t decode_errors;
 } burst_decoder_statistics_t;
-
-typedef void (*burst_managed_decoder_callback_t)(const uint8_t *data, size_t length, void *user_data);
 
 typedef struct
 {
