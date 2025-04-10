@@ -37,6 +37,7 @@ uv pip install --reinstall --no-build-isolation -ve .
 Auto rebuild on run
 ```sh
 uv pip install --reinstall --no-build-isolation -Ceditable.rebuild=true -ve .
+# or 
 pip install --no-build-isolation -Ceditable.rebuild=true -ve .
 ``` 
 
