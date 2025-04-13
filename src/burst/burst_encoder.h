@@ -5,7 +5,8 @@
 #include <stdint.h>
 
 typedef struct {
-	uint32_t bytes_handled;      // Total number of bytes handled
+	uint32_t bytes_ingested;     // Total number of bytes ingested
+	uint32_t bytes_processed;    // Total number of bytes after processing
 	uint32_t packets_processed;  // Successfully decoded packets
 
 	// Error statistics
@@ -32,5 +33,6 @@ burst_packet_t burst_encoder_flush(burst_encoder_t *ctx);
 void burst_managed_encoder_init(burst_managed_encoder_t *burst_managed_encoder, uint8_t *buffer, size_t size);
 int burst_managed_encoder_add_packet(burst_managed_encoder_t *burst_managed_encoder, const uint8_t *data, size_t len);
 burst_packet_t burst_managed_encoder_flush(burst_managed_encoder_t *burst_managed_encoder);
+int burst_managed_encoder_free_space(burst_managed_encoder_t *burst_managed_encoder);
 
 #endif  // BURST_ENCODER_H

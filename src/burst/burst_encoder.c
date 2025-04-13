@@ -88,9 +88,12 @@ void burst_managed_encoder_init(burst_managed_encoder_t *burst_managed_encoder, 
 }
 
 int burst_managed_encoder_add_packet(burst_managed_encoder_t *burst_managed_encoder, const uint8_t *data, size_t len) {
+
 	if (len == 0) {
 		return 0;  // No data to process
 	}
+
+	burst_managed_encoder->statistics.bytes_ingested += len;
 
 	burst_status_t status = burst_encoder_add_packet(&burst_managed_encoder->encoder, data, len);
 
@@ -106,8 +109,12 @@ int burst_managed_encoder_add_packet(burst_managed_encoder_t *burst_managed_enco
 	return 0;
 }
 
+int burst_managed_encoder_free_space(burst_managed_encoder_t *burst_managed_encoder) {
+	return burst_managed_encoder->encoder.buffer_size - burst_managed_encoder->encoder.out_head;
+}
+
 burst_packet_t burst_managed_encoder_flush(burst_managed_encoder_t *burst_managed_encoder) {
 	burst_packet_t packet = burst_encoder_flush(&burst_managed_encoder->encoder);
-	burst_managed_encoder->statistics.bytes_handled += packet.size;
+	burst_managed_encoder->statistics.bytes_processed += packet.size;
 	return packet;
 }

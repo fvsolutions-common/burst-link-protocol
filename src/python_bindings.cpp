@@ -7,9 +7,9 @@ namespace nb = nanobind;
 using namespace nb::literals;
 
 struct BurstInterface {
-	burst_managed_decoder_t decoder;
+	burst_managed_decoder_t decoder = {0};
 	uint8_t decoder_buffer[1024] = {0};
-	burst_encoder_t encoder;
+	burst_encoder_t encoder = {0};
 	uint8_t encoder_buffer[1024] = {0};
 
 	// Create buffer to hold the the vector of bytes likt a list
@@ -47,23 +47,13 @@ struct BurstInterface {
 		return nb::bytes(reinterpret_cast<const char *>(packet.data), packet.size);
 	}
 
-	uint32_t get_bytes_handled() {
-		return decoder.statistics.bytes_handled;
-	}
-	uint32_t get_packets_handled() {
-		return decoder.statistics.packets_processed;
-	}
+	uint32_t get_bytes_ingested() { return decoder.statistics.bytes_ingested; }
+	uint32_t get_bytes_processed() { return decoder.statistics.bytes_processed; }
+	uint32_t get_packets_processed() { return decoder.statistics.packets_processed; }
 
-	uint32_t get_crc_error_count() {
-		return decoder.statistics.crc_errors;
-	}
-	uint32_t get_overrun_count() {
-		return decoder.statistics.overflow_errors;
-	}
-	uint32_t get_packet_error_count() {
-		return decoder.statistics.decode_errors;
-	}
-	
+	uint32_t get_crc_error_count() { return decoder.statistics.crc_errors; }
+	uint32_t get_overrun_count() { return decoder.statistics.overflow_errors; }
+	uint32_t get_packet_error_count() { return decoder.statistics.decode_errors; }
 
 	// Statistics
 };
@@ -76,5 +66,10 @@ NB_MODULE(burst_interface_c, m) {
 		.def("decode", &BurstInterface::decode, "data"_a, "fail_on_crc_error"_a = false)
 		.def("encode", &BurstInterface::encode, "packets"_a)
 		// Use a lambda
-		.def_prop_ro("bytes_handled", &BurstInterface::get_bytes_handled);
+		.def_prop_ro("bytes_handled", &BurstInterface::get_bytes_ingested)
+		.def_prop_ro("bytes_processed", &BurstInterface::get_bytes_processed)
+		.def_prop_ro("packets_processed", &BurstInterface::get_packets_processed)
+		.def_prop_ro("crc_errors", &BurstInterface::get_crc_error_count)
+		.def_prop_ro("overflow_errors", &BurstInterface::get_overrun_count)
+		.def_prop_ro("decode_errors", &BurstInterface::get_packet_error_count);
 }

@@ -7,8 +7,9 @@ typedef int (*burst_managed_decoder_callback_t)(const uint8_t *data, size_t leng
 
 typedef struct
 {
-    uint32_t bytes_handled;     // Total number of bytes handled
-    uint32_t packets_processed; // Successfully decoded packets
+	uint32_t bytes_ingested;     // Total number of bytes ingested
+	uint32_t bytes_processed;    // Total number of bytes after processing
+	uint32_t packets_processed;  // Successfully decoded packets
 
     // Error statistics
     uint32_t crc_errors;
