@@ -166,7 +166,7 @@ int burst_managed_decoder_handle_data(burst_managed_decoder_t *burst_managed_dec
 					// Call the callback function with the received data
 					burst_managed_decoder->callback_function(packet.data, packet.size, burst_managed_decoder->user_data);
 				}
-				
+
 				burst_managed_decoder->statistics.bytes_processed += packet.size;
 				burst_managed_decoder->statistics.packets_processed++;
 
@@ -189,5 +189,5 @@ int burst_managed_decoder_handle_data(burst_managed_decoder_t *burst_managed_dec
 				continue;
 		}
 	}
-	return 0;
+	return bytes_consumed;
 }
