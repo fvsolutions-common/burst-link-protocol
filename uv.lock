@@ -4,13 +4,15 @@ requires-python = ">=3.10, <4.0"
 
 [[package]]
 name = "burst-link-protocol"
-version = "1.1.1"
+version = "1.1.4"
 source = { editable = "." }
 dependencies = [
     { name = "cobs" },
     { name = "crc" },
+    { name = "janus" },
     { name = "nanobind" },
     { name = "numpy" },
+    { name = "pyserial" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-cov" },
@@ -30,9 +32,11 @@ dev = [
 requires-dist = [
     { name = "cobs", specifier = ">=1.2.1,<2.0.0" },
     { name = "crc", specifier = ">=7.1.0,<8.0.0" },
+    { name = "janus", specifier = ">=2.0.0" },
     { name = "nanobind", specifier = ">=2.5.0" },
     { name = "nanobind", marker = "extra == 'dev'", specifier = ">=2.5.0,<3.0.0" },
     { name = "numpy", specifier = ">=2.2.3,<3.0.0" },
+    { name = "pyserial", specifier = ">=3.5" },
     { name = "pytest", specifier = ">=8.3.4,<9.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4,<9.0.0" },
     { name = "pytest-benchmark", specifier = ">=5.1.0,<6.0.0" },
@@ -162,6 +166,15 @@ wheels = [
 ]
 
 [[package]]
+name = "janus"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d8/7f/69884b6618be4baf6ebcacc716ee8680a842428a19f403db6d1c0bb990aa/janus-2.0.0.tar.gz", hash = "sha256:0970f38e0e725400496c834a368a67ee551dc3b5ad0a257e132f5b46f2e77770", size = 22910 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/68/34/65604740edcb20e1bda6a890348ed7d282e7dd23aa00401cbe36fd0edbd9/janus-2.0.0-py3-none-any.whl", hash = "sha256:7e6449d34eab04cd016befbd7d8c0d8acaaaab67cb59e076a69149f9031745f9", size = 12161 },
+]
+
+[[package]]
 name = "nanobind"
 version = "2.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -266,6 +279,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/37/a8/d832f7293ebb21690860d2e01d8115e5ff6f2ae8bbdc953f0eb0fa4bd2c7/py-cpuinfo-9.0.0.tar.gz", hash = "sha256:3cdbbf3fac90dc6f118bfd64384f309edeadd902d7c8fb17f02ffa1fc3f49690", size = 104716 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/a9/023730ba63db1e494a271cb018dcd361bd2c917ba7004c3e49d5daf795a2/py_cpuinfo-9.0.0-py3-none-any.whl", hash = "sha256:859625bc251f64e21f077d099d4162689c762b5d6a4c3c97553d56241c9674d5", size = 22335 },
+]
+
+[[package]]
+name = "pyserial"
+version = "3.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/7d/ae3f0a63f41e4d2f6cb66a5b57197850f919f59e558159a4dd3a818f5082/pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb", size = 159125 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/07/bc/587a445451b253b285629263eb51c2d8e9bcea4fc97826266d186f96f558/pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0", size = 90585 },
 ]
 
 [[package]]

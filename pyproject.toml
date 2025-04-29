@@ -16,6 +16,8 @@ dependencies = [
   "pytest-benchmark>=5.1.0,<6.0.0",
   "scikit-build-core>=0.10.7",
   "nanobind>=2.5.0",
+  "pyserial>=3.5",
+  "janus>=2.0.0",
 ]
 license-files = ["LICENSE"]
 
