@@ -1,10 +1,11 @@
-from burst_interface_c import  BurstInterfaceC
+from burst_interface_c import BurstInterfaceC
 import serial
 import time
 import threading
 import asyncio
 import janus
 from pydantic import BaseModel, Field
+
 
 def to_si(value: float, suffix: str) -> str:
     """
@@ -34,9 +35,9 @@ class BurstSerialStatistics(BaseModel):
     overflow_errors: int = 0
     decode_errors: int = 0
 
-    handled_bytes_per_second: float = 0
-    processed_bytes_per_second: float = 0
-    processed_packets_per_second: float = 0
+    handled_bytes_per_second: float = 0.0
+    processed_bytes_per_second: float = 0.0
+    processed_packets_per_second: float = 0.0
 
     def update(
         self,
@@ -47,21 +48,14 @@ class BurstSerialStatistics(BaseModel):
         overflow_errors,
         decode_errors,
     ):
-
         now = time.time()
         if now - self.last_update_timestamp > 1:
             delta_time = now - self.last_update_timestamp
             self.last_update_timestamp = now
 
-            self.handled_bytes_per_second = (
-                (bytes_handled - self.bytes_handled) / delta_time
-            )
-            self.processed_bytes_per_second = (
-                (bytes_processed - self.bytes_processed) / delta_time
-            )
-            self.processed_packets_per_second = (
-                (packets_processed - self.packets_processed) / delta_time
-            )
+            self.handled_bytes_per_second = (bytes_handled - self.bytes_handled) / delta_time
+            self.processed_bytes_per_second = (bytes_processed - self.bytes_processed) / delta_time
+            self.processed_packets_per_second = (packets_processed - self.packets_processed) / delta_time
 
             self.bytes_handled = bytes_handled
             self.bytes_processed = bytes_processed
@@ -74,11 +68,15 @@ class BurstSerialStatistics(BaseModel):
 
     def __str__(self):
         return (
-            f"Byte Raw: {to_si(self.bytes_handled, 'B')} ({to_si(self.handled_bytes_per_second*8, 'bps')}), "
-            f"Bytes processed: {to_si(self.bytes_processed, 'B')} ({to_si(self.processed_bytes_per_second*8, 'bps')}), "
+            f"Byte Raw: {to_si(self.bytes_handled, 'B')} ({to_si(self.handled_bytes_per_second * 8, 'bps')}), "
+            f"Bytes processed: {to_si(self.bytes_processed, 'B')} ({to_si(self.processed_bytes_per_second * 8, 'bps')}), "
             f"Packets processed: {self.packets_processed} ({to_si(self.processed_packets_per_second, 'packets/s')}), "
             f"Errors (CRC: {self.crc_errors}, Overflow: {self.overflow_errors}, Decode: {self.decode_errors})"
         )
+
+    def to_dict(self):
+        return self.model_dump(exclude={"last_update_timestamp"})
+
 
 class SerialBurstInterface:
     debug_timings = False

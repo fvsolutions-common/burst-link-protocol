@@ -31,9 +31,7 @@ def test_python_crc_validation():
         with pytest.raises(Exception):
             decoded = c_interface.decode(bytes(data_copy), fail_on_crc_error=True)
             print(decoded)
-            assert len(decoded) == len(packets), (
-                f"Expected {len(packets)} packets, got {len(decoded)}"
-            )
+            assert len(decoded) == len(packets), f"Expected {len(packets)} packets, got {len(decoded)}"
 
 
 def test_max_size_error():

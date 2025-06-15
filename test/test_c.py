@@ -20,5 +20,6 @@ def test_c_encoding_decoding_fail():
     print(decoded)
     assert packets == decoded, f"Expected {packets}, got {decoded}"
 
+
 if __name__ == "__main__":
     test_c_encoding_decoding()

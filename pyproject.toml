@@ -1,6 +1,6 @@
 [project]
 name = "burst-link-protocol"
-version = "1.1.4"  # Choose one version reference here
+version = "1.1.5"  # Choose one version reference here
 description = "Binary Utility for Reliable Stream Transfer (BURST) is a library for encoding and decoding binary data streams into and from a byte stream."
 requires-python = ">=3.10,<4.0"
 authors = [
@@ -62,3 +62,16 @@ test-skip="cp38-macosx_*:arm64"
 # Needed for full C++17 support
 [tool.cibuildwheel.macos.environment]
 MACOSX_DEPLOYMENT_TARGET = "10.14"
+
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E402"]
+
+[tool.ruff]
+line-length = 120
+exclude = ["**.pyi", "**/.venv/**"]
+include = ["src/**.py", "test/**.py"]
+
+[tool.pyright]
+ignore = ["**.pyi", "**/.venv/**"]

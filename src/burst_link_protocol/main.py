@@ -1,7 +1,8 @@
 from cobs import cobs
-from crc import Calculator,Crc16
+from crc import Calculator, Crc16
 
-crc = Calculator(Crc16.IBM_3740)
+crc = Calculator(Crc16.IBM_3740)  # type: ignore
+
 
 class BurstInterfacePy:
     buffer = b""
@@ -10,9 +11,8 @@ class BurstInterfacePy:
         pass
 
     @staticmethod
-    def crc16( data: bytes) -> bytes:
+    def crc16(data: bytes) -> bytes:
         return crc.checksum(data).to_bytes(2, "big")
-    
 
     @staticmethod
     def encode_packet(packet: bytes) -> bytes:
@@ -38,4 +38,3 @@ class BurstInterfacePy:
         # Add last packet to buffer
         self.buffer = separated_packets.pop()
         return [self.decode_packet(packet) for packet in separated_packets]
-

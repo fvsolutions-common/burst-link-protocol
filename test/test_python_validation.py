@@ -1,22 +1,23 @@
-
 from burst_link_protocol import BurstInterfacePy
 import pytest
 
+
 def test_python():
-    interface =  BurstInterfacePy()
+    interface = BurstInterfacePy()
     packets = [b"Hello, world!", b"Goodbye, world!"]
 
     data = interface.encode(packets)
     decoded = interface.decode(data)
     assert packets == decoded
 
+
 def test_python_crc_validation():
-    interface =  BurstInterfacePy()
+    interface = BurstInterfacePy()
     packets = [b"Hello, world!", b"Goodbye, world!"]
 
     data = bytearray(interface.encode(packets))
 
-    for i in range( len(data)):
+    for i in range(len(data)):
         data_copy = data.copy()
 
         # modify byte x
