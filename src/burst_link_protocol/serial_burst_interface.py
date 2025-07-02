@@ -126,11 +126,11 @@ class SerialBurstInterface:
             self.interface.decode_errors,
         )
 
-    def close(self):
+    def close(self,timeout: float = 1.0):
         self.kill = True
-        self.handle.close()
         self.transmit_packet_queue.close()
         self.receive_packet_queue.close()
+        self.transmit_task_handle.join(timeout=timeout)
 
     def receive_task(self):
         try:
