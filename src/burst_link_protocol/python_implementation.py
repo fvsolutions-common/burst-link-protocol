@@ -1,3 +1,5 @@
+"""Python implementation of Burst Link Protocol, slow but easy to read and understand."""
+
 from cobs import cobs
 from crc import Calculator, Crc16
 

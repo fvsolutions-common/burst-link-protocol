@@ -24,7 +24,11 @@ pip install burst-link-protocol
 ## From Source
 Note: You need a valid C++ compiler and Python 3.7+ installed on your system.
 
-Basic installation
+For windows, you can use Visual Studio Build Tools.
+Go to this [link](https://visualstudio.microsoft.com/downloads/) and download "Build Tools for Visual Studio 2022", then install "Desktop development with C++" workload.
+
+For Linux, you can use gcc or clang.
+
 ```sh
 uv pip install --reinstall -e .
 ```

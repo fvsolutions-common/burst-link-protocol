@@ -1,82 +1,32 @@
-from burst_interface_c import BurstInterfaceC
-import serial
-import time
-import threading
 import asyncio
+import threading
+import time
+
 import janus
-from pydantic import BaseModel, Field
+import serial
+from burst_interface_c import BurstInterfaceC
 
+from .link_statistics import BurstLinkStatistics
+import io
+import socket
 
-def to_si(value: float, suffix: str) -> str:
-    """
-    Convert a value to a string with SI suffix.
-    """
-    if value == 0:
-        return "0"
-    elif value < 1e-3:
-        return f"{value:.2f} {suffix}"
-    elif value < 1e3:
-        return f"{value:.2f} {suffix}"
-    elif value < 1e6:
-        return f"{value / 1e3:.2f} k{suffix}"
-    elif value < 1e9:
-        return f"{value / 1e6:.2f} M{suffix}"
-    else:
-        return f"{value / 1e9:.2f} G{suffix}"
+class TCPSocket(io.RawIOBase):
+    def __init__(self, sock: socket.socket):
+        self.sock = sock
 
+    def read(self, size=-1):
+        try:
+            return self.sock.recv(size)
+        except BlockingIOError:
+            return b""
 
-class BurstSerialStatistics(BaseModel):
-    last_update_timestamp: float = Field(default_factory=time.time)
+    def write(self, b):
+        return self.sock.send(b)
 
-    bytes_handled: int = 0
-    bytes_processed: int = 0
-    packets_processed: int = 0
-    crc_errors: int = 0
-    overflow_errors: int = 0
-    decode_errors: int = 0
-
-    handled_bytes_per_second: float = 0.0
-    processed_bytes_per_second: float = 0.0
-    processed_packets_per_second: float = 0.0
-
-    def update(
-        self,
-        bytes_handled,
-        bytes_processed,
-        packets_processed,
-        crc_errors,
-        overflow_errors,
-        decode_errors,
-    ):
-        now = time.time()
-        if now - self.last_update_timestamp > 1:
-            delta_time = now - self.last_update_timestamp
-            self.last_update_timestamp = now
-
-            self.handled_bytes_per_second = (bytes_handled - self.bytes_handled) / delta_time
-            self.processed_bytes_per_second = (bytes_processed - self.bytes_processed) / delta_time
-            self.processed_packets_per_second = (packets_processed - self.packets_processed) / delta_time
-
-            self.bytes_handled = bytes_handled
-            self.bytes_processed = bytes_processed
-            self.packets_processed = packets_processed
-            self.crc_errors = crc_errors
-            self.overflow_errors = overflow_errors
-            self.decode_errors = decode_errors
-
-        return self
-
-    def __str__(self):
-        return (
-            f"Byte Raw: {to_si(self.bytes_handled, 'B')} ({to_si(self.handled_bytes_per_second * 8, 'bps')}), "
-            f"Bytes processed: {to_si(self.bytes_processed, 'B')} ({to_si(self.processed_bytes_per_second * 8, 'bps')}), "
-            f"Packets processed: {self.packets_processed} ({to_si(self.processed_packets_per_second, 'packets/s')}), "
-            f"Errors (CRC: {self.crc_errors}, Overflow: {self.overflow_errors}, Decode: {self.decode_errors})"
-        )
-
-    def to_dict(self):
-        return self.model_dump(exclude={"last_update_timestamp"})
-
+    def close(self):
+        self.sock.close()
+        return super().close()
+    
 
 class SerialBurstInterface:
     debug_timings = False
@@ -87,9 +37,9 @@ class SerialBurstInterface:
     RATE_CHECK_INTERVAL = 1
 
     interface: BurstInterfaceC
+    _statistics: BurstLinkStatistics
+    _handle: io.RawIOBase
     last_rate_timestamp: float = 0
-
-    statitsics: BurstSerialStatistics
 
     @classmethod
     def from_serial(cls, port: str, bitrate: int):
@@ -97,13 +47,27 @@ class SerialBurstInterface:
         serial_handle.set_buffer_size(rx_size=100 * 1024, tx_size=100 * 1024)  # type: ignore
         return cls(serial_handle)
 
-    def __init__(self, serial_handle: serial.Serial):
-        self.handle = serial_handle
-        self.handle.reset_input_buffer()
-        self.handle.reset_output_buffer()
+    @classmethod
+    def from_file(cls, file_path: str):
+        file_handle = open(file_path, "r+b", buffering=0)
+        return cls(file_handle)
 
-        self.current_stats = BurstSerialStatistics()
-        self.statitsics = BurstSerialStatistics()
+    @classmethod
+    def from_tcp(cls, host: str, port: int):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((host, port))
+        sock.setblocking(False)
+        return cls(TCPSocket(sock))
+
+    def __init__(self, serial_handle: io.RawIOBase):
+        self._handle = serial_handle
+
+        if isinstance(self._handle, serial.Serial):
+            self._handle.reset_input_buffer()
+            self._handle.reset_output_buffer()
+
+        self.current_stats = BurstLinkStatistics()
+        self._statistics = BurstLinkStatistics()
 
         self.receive_task_handle = threading.Thread(target=self.receive_task, daemon=True)
         self.transmit_task_handle = threading.Thread(target=self.transmit_task, daemon=True)
@@ -126,7 +90,7 @@ class SerialBurstInterface:
             self.interface.decode_errors,
         )
 
-    def close(self,timeout: float = 1.0):
+    def close(self, timeout: float = 1.0):
         self.kill = True
         self.transmit_packet_queue.close()
         self.receive_packet_queue.close()
@@ -136,7 +100,7 @@ class SerialBurstInterface:
         try:
             while True:
                 # Read incoming data
-                data = self.handle.read(self.block_size)
+                data = self._handle.read(self.block_size)
 
                 if self.kill:
                     break
@@ -181,7 +145,7 @@ class SerialBurstInterface:
 
                     # print raw frame
                     print(f"Transmitting 'raw' burst frame: {' '.join([f'{x:02X}' for x in data])}")
-                self.handle.write(data)
+                self._handle.write(data)
 
         except Exception as e:
             print(f"Error in transmit task: {e}")
