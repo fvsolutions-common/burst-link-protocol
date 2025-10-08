@@ -5,6 +5,13 @@ import threading
 import asyncio
 import janus
 from pydantic import BaseModel, Field
+import time
+
+START_TIME = time.time()
+
+
+def hexdump(name: str, data: bytes):
+    print(f"{(time.time() - START_TIME):6.2f} {name:15s}: {' '.join([f'{x:02X}' for x in data])}, length: {len(data)}")
 
 
 def to_si(value: float, suffix: str) -> str:
@@ -126,7 +133,7 @@ class SerialBurstInterface:
             self.interface.decode_errors,
         )
 
-    def close(self,timeout: float = 1.0):
+    def close(self, timeout: float = 1.0):
         self.kill = True
         self.transmit_packet_queue.close()
         self.receive_packet_queue.close()
@@ -143,7 +150,7 @@ class SerialBurstInterface:
 
                 if data:
                     if self.debug_io:
-                        print(f"Received burst frame: {' '.join([f'{x:02X}' for x in data])}, length: {len(data)}")
+                        hexdump("RX [RAW]", data)
                     try:
                         decoded_packets = self.interface.decode(data, fail_on_crc_error=True)
                     except Exception as e:
@@ -153,7 +160,7 @@ class SerialBurstInterface:
                     for packet in decoded_packets:
                         # put all packets in the receive queue
                         if self.debug_io:
-                            print(f"Received: {packet}")
+                            hexdump("RX", packet)
 
                         self.receive_packet_queue.sync_q.put(packet)
 
@@ -168,19 +175,20 @@ class SerialBurstInterface:
             while True:
                 packet = self.transmit_packet_queue.sync_q.get()
                 if self.debug_io:
-                    print(f"Transmitting packet: {' '.join([f'{x:02X}' for x in packet])}")
-
+                    hexdump("TX", packet)
                 data = self.interface.encode([packet])
 
                 if self.debug_io:
-                    from cobs import cobs
+                    # from cobs import cobs
 
-                    daat = cobs.decode(data[:-1])
+                    # _data = cobs.decode(data[:-1])
                     # print in space separated hex
-                    print(f"Transmitting burst frame: {' '.join([f'{x:02X}' for x in daat])}")
+                    # print(f"Transmitting burst frame: {' '.join([f'{x:02X}' for x in _data])}")
 
                     # print raw frame
-                    print(f"Transmitting 'raw' burst frame: {' '.join([f'{x:02X}' for x in data])}")
+                    # print(f"Transmitting 'raw' burst frame: {' '.join([f'{x:02X}' for x in data])}")
+                    hexdump("TX [ENC]", data)
+
                 self.handle.write(data)
 
         except Exception as e:
@@ -199,7 +207,11 @@ class SerialBurstInterface:
         await self.flush_receive_queue()
 
         start_time = time.time()
+
+        # Start transmission
         await self.transmit_packet_queue.async_q.put(data)
+
+        # Wait for response
         response = await self.receive_packet_queue.async_q.get()
         end_time = time.time()
 
