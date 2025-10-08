@@ -101,7 +101,11 @@ class SerialBurstInterface:
     @classmethod
     def from_serial(cls, port: str, bitrate: int):
         serial_handle: serial.Serial = serial.Serial(port, bitrate, timeout=0.5)
-        serial_handle.set_buffer_size(rx_size=100 * 1024, tx_size=100 * 1024)  # type: ignore
+        try:
+            serial_handle.set_buffer_size(rx_size=100 * 1024, tx_size=100 * 1024)  # type: ignore
+        except Exception as e:
+            print("failed to set buffer size", e)
+
         return cls(serial_handle)
 
     def __init__(self, serial_handle: serial.Serial):
