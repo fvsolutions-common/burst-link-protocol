@@ -104,7 +104,7 @@ class SerialBurstInterface:
         try:
             serial_handle.set_buffer_size(rx_size=100 * 1024, tx_size=100 * 1024)  # type: ignore
         except Exception as e:
-            print("failed to set buffer size", e)
+            print("warning: failed to set buffer size", e)
 
         return cls(serial_handle)
 
