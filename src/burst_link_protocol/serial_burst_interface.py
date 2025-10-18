@@ -153,6 +153,10 @@ class SerialBurstInterface:
                     break
 
                 if data:
+                    # There is a bug if we receive a 00 byte alone, so we pretend we never see it
+                    if data == b"\x00":
+                        continue
+
                     if self.debug_io:
                         hexdump("RX [RAW]", data)
                     try:
