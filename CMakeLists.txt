@@ -13,16 +13,24 @@ if(DEFINED ENV{IDF_PATH})
   return()
 endif()
 
-# If Zephyr is reading this CMakeLists.txt, register it as a Zephyr module
+# If Zephyr is reading this CMakeLists.txt, register it as a normal CMake library
 if(Zephyr_FOUND)
-  zephyr_library_named(burst-link-protocol)
-  zephyr_library_sources(
-    "src/burst/burst_decoder.c"
-    "src/burst/burst_encoder.c"
-    "src/burst/burst_generic.c"
+  add_library(burst-link-protocol STATIC
+      src/burst/burst_decoder.c
+      src/burst/burst_encoder.c
+      src/burst/burst_generic.c
   )
 
-  target_include_directories(burst-link-protocol PUBLIC src)
+  target_include_directories(burst-link-protocol PUBLIC
+      ${CMAKE_CURRENT_SOURCE_DIR}/src
+  )
+
+  # Give the library Zephyr's compile flags, include dirs, and macros
+  target_link_libraries(burst-link-protocol
+      PUBLIC
+          zephyr_interface
+  )
+
   return()
 endif()
 
