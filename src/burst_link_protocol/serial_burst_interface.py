@@ -186,6 +186,11 @@ class SerialBurstInterface:
                     hexdump("TX", packet)
                 data = self.interface.encode([packet])
 
+                # Padd the data
+                LENGTH_MULTIPLE = 16
+                extra_bytes = len(data) % LENGTH_MULTIPLE
+                data = data + b"\0" * extra_bytes
+
                 if self.debug_io:
                     # from cobs import cobs
 
