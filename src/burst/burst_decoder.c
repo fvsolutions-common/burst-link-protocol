@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+// #define BURST_DECODER_DEBUG
+
 void burst_decoder_init(burst_decoder_t *ctx, uint8_t *buffer, size_t size) {
 	ctx->buffer = buffer;
 	ctx->buffer_size = size;
@@ -16,6 +18,14 @@ burst_status_t bust_decoder_add_data(burst_decoder_t *ctx, const uint8_t *data, 
 	if (ctx->finished) {
 		burst_decoder_reset(ctx);
 	}
+
+#ifdef BURST_DECODER_DEBUG
+	printf("BURST Ingest RAW: ");
+	for (size_t i = 0; i < size; i++) {
+		printf("%02X ", data[i]);
+	}
+	printf("\n");
+#endif
 
 	for (size_t i = 0; i < size; i++) {
 		uint8_t byte = data[i];
@@ -40,8 +50,8 @@ void burst_decoder_reset(burst_decoder_t *ctx) {
 }
 
 burst_status_t burst_decoder_complete_packet(burst_decoder_t *ctx) {
-#if 0
-	printf("Completed packet: ");
+#ifdef BURST_DECODER_DEBUG
+	printf("	Completed packet: ");
 	for (size_t i = 0; i < ctx->out_head; i++) {
 		printf("%02X ", ctx->buffer[i]);
 	}
@@ -60,70 +70,77 @@ burst_status_t burst_decoder_complete_packet(burst_decoder_t *ctx) {
 
 	// Check if the CRCs match.
 	if (computed_crc != received_crc) {
+#ifdef BURST_DECODER_DEBUG
+		printf("	CRC error, computed: %04X, received: %04X\n", computed_crc, received_crc);
+#endif
 		return BURST_CRC_ERROR;
 	}
 
 	// CRC check passed, we can remove it from the packet.
 	ctx->out_head -= CRC_SIZE;
+
+	#ifdef BURST_DECODER_DEBUG
+	printf("	Final packet: ");
+	for (size_t i = 0; i < ctx->out_head; i++) {
+		printf("%02X ", ctx->buffer[i]);
+	}
+	printf("\n");
+#endif
 	return BURST_PACKET_READY;
 }
 
 burst_status_t burst_decoder_add_byte(burst_decoder_t *ctx, uint8_t byte) {
-	// Check for space in the buffer
+	// Handle 0x00 is ALWAYS a delimiter
+	if (byte == 0) {
+		// If we have data in the buffer, try to finish the packet
+		if (ctx->out_head > 0) {
+			burst_status_t res = burst_decoder_complete_packet(ctx);
+			return res;
+		}
+		// If buffer is empty, it's just idle padding zeros; ignore them.
+		burst_decoder_reset(ctx);
+		return BURST_DATA_CONSUMED;
+	}
+
+	// 2. Prevent Buffer Overflow
 	if (ctx->out_head >= ctx->buffer_size) {
 		return BURST_OVERFLOW_ERROR;
 	}
 
 	switch (ctx->state) {
-		case COBS_DECODE_FINISH_RUN:
-			// If the byte is zero, the block is complete
-			if (byte == 0) {
-				return burst_decoder_complete_packet(ctx);
-			}
-
-			/* fallthrough */
 		case COBS_DECODE_READ_CODE:
-
-			// If last code was 0xF, its a overhead byte
-			if (ctx->code != 0xFF) {
+			// This byte is a Code Byte (1-255)
+			// Insert a 0x00 if this isn't the first block of the packet
+			// AND the previous block wasn't a full 255-byte run.
+			if (ctx->code != 0xFF && ctx->out_head > 0) {
 				ctx->buffer[ctx->out_head++] = 0;
+				if (ctx->out_head >= ctx->buffer_size) return BURST_OVERFLOW_ERROR;
 			}
 
-			// The data is a new block code
 			ctx->block = ctx->code = byte;
 
-			// If the code is 1, the block is already complete
-			if (byte != 1) {
-				ctx->state = COBS_DECODE_RUN;
+			if (byte == 1) {
+				// A code of 1 means a single zero was encoded;
+				// the next byte will be another code byte.
+				ctx->state = COBS_DECODE_READ_CODE;
 			} else {
-				ctx->state = COBS_DECODE_FINISH_RUN;
+				ctx->state = COBS_DECODE_RUN;
 			}
-
-			return BURST_DATA_CONSUMED;
+			break;
 
 		case COBS_DECODE_RUN:
-
-			// Decrement the block counter
+			ctx->buffer[ctx->out_head++] = byte;
 			ctx->block--;
 
-			// If we het a unexpected delimiter, return an error
-			if (!byte) {
-				return BURST_DECODE_ERROR;
-			}
-
-			ctx->buffer[ctx->out_head++] = byte;
-
+			// When the block counter hits 1, the next byte must be a code byte.
 			if (ctx->block == 1) {
-				ctx->state = COBS_DECODE_FINISH_RUN;
+				ctx->state = COBS_DECODE_READ_CODE;
 			}
-
-			return BURST_DATA_CONSUMED;
+			break;
 	}
 
-	// This should never happen, but some compilers are dumb
-	return BURST_DECODE_ERROR;
+	return BURST_DATA_CONSUMED;
 }
-
 burst_packet_t burst_decoder_get_packet(burst_decoder_t *ctx) {
 	if (!ctx->finished) {
 		burst_packet_t packet;
@@ -157,11 +174,12 @@ int burst_managed_decoder_handle_data(burst_managed_decoder_t *burst_managed_dec
 		size_t data_len = len - bytes_consumed;
 
 		burst_status_t status = bust_decoder_add_data(&burst_managed_decoder->decoder, data_ptr, data_len, &bytes_consumed);
-
 		switch (status) {
 			case BURST_PACKET_READY: {
 				burst_packet_t packet = burst_decoder_get_packet(&burst_managed_decoder->decoder);
-
+#ifdef BURST_DECODER_DEBUG
+				printf("Decoded packet of size %d bytes\n", packet.size);
+#endif
 				if (packet.size > 0 && burst_managed_decoder->callback_function != NULL) {
 					// Call the callback function with the received data
 					burst_managed_decoder->callback_function(packet.data, packet.size, burst_managed_decoder->user_data);
@@ -174,14 +192,23 @@ int burst_managed_decoder_handle_data(burst_managed_decoder_t *burst_managed_dec
 			}
 
 			case BURST_CRC_ERROR:
+#ifdef BURST_DECODER_DEBUG
+				printf("CRC Error on packet\n");
+#endif
 				burst_managed_decoder->statistics.crc_errors++;
 				continue;
 
 			case BURST_DECODE_ERROR:
+#ifdef BURST_DECODER_DEBUG
+				printf("Decode Error on packet\n");
+#endif
 				burst_managed_decoder->statistics.decode_errors++;
 				continue;
 
 			case BURST_OVERFLOW_ERROR:
+#ifdef BURST_DECODER_DEBUG
+				printf("Overflow Error on packet\n");
+#endif
 				burst_managed_decoder->statistics.overflow_errors++;
 				continue;
 
