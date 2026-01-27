@@ -26,7 +26,7 @@ typedef struct
     {
         COBS_DECODE_READ_CODE,
         COBS_DECODE_RUN,
-        COBS_DECODE_FINISH_RUN
+        // COBS_DECODE_FINISH_RUN
     } state;
     uint8_t block, code;
 
